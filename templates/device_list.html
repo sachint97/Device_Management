@@ -1,0 +1,56 @@
+{% extends "base.html"%}
+{% block content %}
+<div class="mx-auto p-2" style="width: 80%;">
+    <br>
+    <h3 class="device text-center">List Of Devices</h3>
+    <br>
+    <table class="table table-sm table-hover table-striped p-3">
+        <thead>
+        <tr>
+            <th scope="col" class="text-center table-dark">Name</th>
+            <th scope="col" class="text-center table-dark">Description</th>
+            <th scope="col" class="text-center table-dark">Created Date</th>
+            <th scope="col" class="text-center table-dark">Updated Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for device in device_list%}
+        <tr>
+            <td class="text-center">{{device.name}}</td>
+            <td class="text-center">{{device.description | slice:100}}</td>
+            <td class="text-center">{{device.created_date}}</td>
+            <td class="text-center">{{device.modified_date |default_if_none:""|default:"--"}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+
+        {% if device_list.has_previous %}
+            <li class="page-item">
+                <a class="page-link bg-dark text-white" href="?page={{ device_list.previous_page_number }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo; Previous</span>
+                </a>
+            </li>
+        {% endif %}
+
+        {% for num in device_list.paginator.page_range %}
+            <li class="page-item{% if device_list.number == num %} active{% endif %}">
+                <a class="page-link{% if device_list.number == num %} bg-dark text-white{% endif %}" href="?page={{ num }}">{{ num }}</a>
+            </li>
+        {% endfor %}
+
+        {% if device_list.has_next %}
+            <li class="page-item">
+                <a class="page-link bg-dark text-white" href="?page={{ device_list.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">Next &raquo;</span>
+                </a>
+            </li>
+        {% endif %}
+
+    </ul>
+</nav>
+</div>
+{% endblock content %}
