@@ -26,6 +26,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('', RedirectView.as_view(url='/app/home/', permanent=True)),
     path("app/",include("app.urls")),
-    path("api/",include("api.urls"))
+    path("api/",include("api.urls")),
+    path('', include('django_prometheus.urls')),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

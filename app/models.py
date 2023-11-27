@@ -5,7 +5,7 @@ class Device(models.Model):
     name = models.CharField(max_length=30,blank=False)
     description = models.TextField(null=True, blank=True)
     created_date = models.DateField(auto_now_add=True)
-    modified_date = models.DateField(blank=True)
+    modified_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.name
