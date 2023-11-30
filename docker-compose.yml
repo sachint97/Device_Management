@@ -6,22 +6,31 @@ services:
     environment:
       - TRACING_HOST=jaeger
       - TRACING_PORT=6831
+      - TZ=Asia/Calcutta
     ports:
       - "8000:8000"
     depends_on:
       - db
     command: >
       sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    # network_mode: host
-      
+    networks:
+      - mynetwork
+    labels:
+      - "app.service=django-app"
+    
   db:
     image: postgres:latest
     environment:
-      POSTGRES_DB: mltdemo
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      - POSTGRES_DB=mltdemo
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - TZ=Asia/Calcutta
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+    labels:
+      - "db.service=postgres-db"
 
   grafana:
     image: grafana/grafana
@@ -29,18 +38,32 @@ services:
       - "3001:3000"
     volumes:
       - ./grafana/dashboard.yaml:/etc/grafana/provisioning/datasources/dashboard.yaml
-    # environment:
-    #   - GF_SECURITY_ADMIN_PASSWORD=admin  # Change this password
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+    environment:
+      # - GF_SECURITY_ADMIN_PASSWORD=admin  # Change this password
+      - TZ=Asia/Calcutta
     depends_on:
       - loki
       - prometheus
       - jaeger
+    networks:
+      - mynetwork
+    labels:
+      - "grafana.service=grafana"
+
 
   jaeger:
     image: jaegertracing/all-in-one:1.32
     ports:
       - 16686:16686
       - 6831:6831
+    environment:
+      - TZ=Asia/Calcutta
+    networks:
+      - mynetwork
+    labels:
+      - "jaeger.service=jaeger"
+
 
   prometheus:
     image: prom/prometheus:v2.35.0
@@ -49,6 +72,13 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
     command: --config.file=/etc/prometheus/prometheus.yaml --web.enable-lifecycle
+    environment:
+      - TZ=Asia/Calcutta
+    networks:
+      - mynetwork
+    labels:
+      - "prometheus.service=prometheus"
+
 
   loki:
     image: grafana/loki:latest
@@ -56,16 +86,34 @@ services:
       - "3100:3100"
     depends_on:
       - promtail
+    environment:
+      - TZ=Asia/Calcutta
+    networks:
+      - mynetwork
+    labels:
+      - "loki.service=loki"
+
 
   promtail:
-    image: grafana/promtail
+    image: grafana/promtail:latest
     volumes:
       - ./promtail:/etc/promtail
-      - ./logs:/var/log
-    command: --config.file=/etc/promtail/promtail.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # - ./logs/my_log_file.log:/var/log/my_log_file.log 
+      # - ./logs:/path/to/promtail/logs
+    command: --config.file=/etc/promtail/promtail.yaml 
     depends_on:
       - web
-
+    environment:
+      - TZ=Asia/Calcutta
+    networks:
+      - mynetwork
+    labels:
+      - "promtail.service=promtail"
+    
+networks:
+  mynetwork:
+    
 volumes:
   postgres_data:
 

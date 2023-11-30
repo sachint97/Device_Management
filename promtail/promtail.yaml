@@ -9,10 +9,92 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-- job_name: django-log-scraper
+- job_name: containerlogs
   static_configs:
   - targets:
-      - localhost
+      - web:8000
     labels:
-      __path__: "/var/log/*.log"
-      app: web
+      app: django-app
+      __path__: /var/lib/docker/containers/*/*log
+
+- job_name: containerlogs
+  static_configs:
+  - targets:
+      - db  # Adjust this to match your PostgreSQL service's host and port
+    labels:
+      app: postgres-app
+      __path__: /var/lib/docker/containers/*/*log
+
+- job_name: containerlogs
+  static_configs:
+  - targets:
+      - grafana:3000  # Adjust this to match your Grafana service's host and port
+    labels:
+      app: grafana-app
+      __path__: /var/lib/docker/containers/*/*log
+
+- job_name: containerlogs
+  static_configs:
+  - targets:
+      - jaeger  # Adjust this to match your Jaeger service's host and port
+    labels:
+      app: jaeger-app
+      __path__: /var/lib/docker/containers/*/*log
+
+- job_name: containerlogs
+  static_configs:
+  - targets:
+      - prometheus:9090  # Adjust this to match your Prometheus service's host and port
+    labels:
+      app: prometheus-app
+      __path__: /var/lib/docker/containers/*/*log
+
+- job_name: containerlogs
+  static_configs:
+  - targets:
+      - loki:3100  # Adjust this to match your Loki service's host and port
+    labels:
+      app: loki-app
+      __path__: /var/lib/docker/containers/*/*log
+
+- job_name: containerlogs
+  static_configs:
+  - targets:
+      - promtail:9080  # Adjust this to match your Promtail service's host and port
+    labels:
+      app: promtail-app
+      __path__: /var/lib/docker/containers/*/*log
+
+  pipeline_stages:
+  - labels:
+      image_name: $__meta_container_label_image_name
+      container_name: $__meta_container_label_container_name
+      image_id: $__meta_container_label_image_id
+      container_id: $__meta_container_label_container_id
+      app: $1
+  # pipeline_stages:
+  # - json:
+  #     expressions:
+  #       output: log
+  #       stream: stream
+  #       attrs:
+  # - json:
+  #     expressions:
+  #       tag:
+  #     source: attrs
+  # - regex:
+  #     expression: (?P<image_name>(?:[^|]*[^|])).(?P<container_name>(?:[^|]*[^|])).(?P<image_id>(?:[^|]*[^|])).(?P<container_id>(?:[^|]*[^|]))
+  #     source: tag
+  # - timestamp:
+  #     format: RFC3339Nano
+  #     source: time
+  # - labels:
+  #     tag:
+  #     stream:
+  #     image_name:
+  #     container_name:
+  #     image_id:
+  #     container_id:
+  #     app: $1
+  # - output:
+  #     source: output

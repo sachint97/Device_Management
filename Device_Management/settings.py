@@ -129,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
 
@@ -154,12 +154,12 @@ LOGGING = {
     'formatters': {
         'trace_formatter': {
             'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] [trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] [%(funcName)s] %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
+            'datefmt': '%Y-%m-%d %H:%M:%S %z',
         },
     },
     'handlers': {
         'file': {
-            'level': 'WARNING',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'trace_formatter',
             'filename': 'logs/my_log_file.log',
@@ -178,7 +178,7 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console', 'file'],
-        'level': 'WARNING',
+        'level': 'INFO',
     },
 }
 

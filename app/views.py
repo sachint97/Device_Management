@@ -38,6 +38,7 @@ def create_device(request):
             form.save()
             logger.info("Device creation successful.")
             return redirect('device_list')
+        else:logger.error("Invalid form")
     else:
         form = DeviceForm()
 
